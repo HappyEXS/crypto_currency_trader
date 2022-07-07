@@ -8,7 +8,13 @@ class Market:
         self._currencies = "BTC,ETH,USDT,BNB,XRP,ADA,SOL,DOGE,ETC"
         self._market = []
 
-    def updateMarket(self):
+    def __str__(self):
+        message = ""
+        for curr in self._market:
+            message += str(curr) + "\n"
+        return message
+
+    def update(self):
         self._market = []
         data = urllib.request.urlopen(self._url %self._currencies).read()
         jsonData = json.loads(data)
@@ -17,9 +23,9 @@ class Market:
                 "name:": curr["name"],
                 "price": curr["price"],
                 "volume": curr["1d"]["volume"],
-                "1d": curr["1d"]["price_change_pct"],
-                "7d": curr["7d"]["price_change_pct"],
-                "30d": curr["30d"]["price_change_pct"]}
+                "1d": round(float(curr["1d"]["price_change_pct"])*100, 2),
+                "7d": round(float(curr["7d"]["price_change_pct"])*100, 2),
+                "30d": round(float(curr["30d"]["price_change_pct"])*100, 2)}
             self._market.append(tmpCurr)
 
     def getMarket(self):
