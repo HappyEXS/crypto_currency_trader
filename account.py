@@ -18,36 +18,36 @@ class Account:
         return self._username
 
     def addInvested(self, amount):
-        self._invested += round(amount, 2)
+        self._invested += amount
         self.addFunds(amount)
         self.addBalance(amount)
 
     def getInvested(self):
-        return self._invested
+        return round(self._invested, 2)
 
     def addFunds(self, amount):
-        self._funds += round(amount, 2)
+        self._funds += amount
 
     def getFunds(self):
-        return self._funds
+        return round(self._funds, 2)
 
     def getWalletValue(self):
-        return self._wallet_v
+        return round(self._wallet_v, 2)
 
     def addBalance(self, amount):
-        self._balance += round(amount, 2)
+        self._balance += amount
 
     def getBalance(self):
-        return self._balance
+        return round(self._balance, 2)
 
     def getWallet(self):
         return self._wallet
 
     def buyCurrency(self, name, price, quantity):
         curr = {"name": name,
-                "price": price,
+                "price": float(price),
                 "quantity": int(quantity),
-                "currentPrice": price,
+                "currentPrice": float(price),
                 "value": price*quantity}
         if self.getFunds() < curr["value"]:
             raise Exception("Currency too expensive to buy. Not enough funds!")
@@ -70,13 +70,15 @@ class Account:
 
     def updatePrices(self, livePrices):
         for curr in self._wallet:
-            curr["currentPrice"] = livePrices[curr["name"]]
+            curr["currentPrice"] = float(livePrices[curr["name"]])
             curr["value"] = curr["quantity"] * curr["currentPrice"]
         self.updateBallance()
 
-    def updateBallance(self):
+    def updateWalletValue(self):
         wallet_value = 0
         for curr in self._wallet:
             wallet_value += curr["value"]
-        self._wallet_v = round(wallet_value, 2)
-        self._balance = round(self._wallet_v + self.getFunds(), 2)
+        self._wallet_v = wallet_value
+
+    def updateBallance(self):
+        self._balance = self.getWalletValue() + self.getFunds()
