@@ -53,6 +53,7 @@ class Account:
             raise Exception("Currency too expensive to buy. Not enough funds!")
         self._wallet.append(curr)
         self.addFunds(-curr["value"])
+        self.updateWalletValue()
         self.updateBallance()
 
     def sellCurrency(self, name, quantity):
@@ -66,12 +67,14 @@ class Account:
                 else:
                     curr["quantity"] -= quantity
                     curr["value"] = curr["quantity"] * curr["currentPrice"]
+        self.updateWalletValue()
         self.updateBallance()
 
     def updatePrices(self, livePrices):
         for curr in self._wallet:
             curr["currentPrice"] = float(livePrices[curr["name"]])
             curr["value"] = curr["quantity"] * curr["currentPrice"]
+        self.updateWalletValue()
         self.updateBallance()
 
     def updateWalletValue(self):
