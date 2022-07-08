@@ -9,7 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView
+from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView, QMessageBox, QInputDialog
 
 class Ui_MainWindow(object):
     def __init__(self, account, market):
@@ -138,6 +138,7 @@ class Ui_MainWindow(object):
         self.button_deposit.setGeometry(QtCore.QRect(790, 50, 91, 31))
         self.button_deposit.setStyleSheet("background-color: rgb(205, 209, 255);")
         self.button_deposit.setObjectName("button_deposit")
+        self.button_deposit.clicked.connect(self.deposit)
         self.button_buy = QtWidgets.QPushButton(self.frame)
         self.button_buy.setGeometry(QtCore.QRect(740, 350, 141, 31))
         font = QtGui.QFont()
@@ -145,6 +146,7 @@ class Ui_MainWindow(object):
         self.button_buy.setFont(font)
         self.button_buy.setStyleSheet("background-color: rgb(102, 209, 255);")
         self.button_buy.setObjectName("button_buy")
+        self.button_buy.clicked.connect(self.buy)
         self.button_sell = QtWidgets.QPushButton(self.frame)
         self.button_sell.setGeometry(QtCore.QRect(740, 130, 141, 31))
         font = QtGui.QFont()
@@ -152,6 +154,7 @@ class Ui_MainWindow(object):
         self.button_sell.setFont(font)
         self.button_sell.setStyleSheet("background-color: rgb(102, 209, 255);")
         self.button_sell.setObjectName("button_sell")
+        self.button_sell.clicked.connect(self.sell)
 
     def setupBotButtons(self):
         self.button_bot = QtWidgets.QPushButton(self.frame)
@@ -324,7 +327,6 @@ class Ui_MainWindow(object):
         self.label_recources_value.setText(f"${self._account.getWalletValue()}")
         self.label_funds_value.setText(f"${self._account.getFunds()}")
 
-
     def fortmatToBillions(self, value):
         return round(float(value) / 1000000000, 2)
 
@@ -383,3 +385,71 @@ class Ui_MainWindow(object):
         self.updateMarket()
         self.updateLabels()
 
+    def deposit(self):
+        try:
+            dep_value = float(self.input_deposit.displayText())
+            self._account.addInvested(dep_value)
+            self.updateLabels()
+        except Exception:
+            self.showDepositPopup()
+
+    def showDepositPopup(self):
+        msg = QMessageBox()
+        msg.setWindowTitle("Incorrect Deposit Value")
+        msg.setText("Do not use characters other than numbers!")
+        x = msg.exec_()
+
+    def buy(self):
+        currency_id, done1 = QtWidgets.QInputDialog.getItem(
+            self.centralwidget, 'Buy currency', 'Currency you want to buy', self._market._currencies_list)
+        quantity, done2 = QtWidgets.QInputDialog.getInt(
+            self.centralwidget, 'Buy currency', 'Enter the quantity you want to buy')
+        if done1 and done2:
+            if currency_id not in self._market._currencies_list:
+                self.showBuySellIDPopup()
+            else:
+                livePrice = float(self._market.getLivePrices()[currency_id])
+                if quantity < 1 or (quantity * livePrice) > self._account.getFunds():
+                    self.showBuySellQuantityPopup()
+                else:
+                    self._account.buyCurrency(currency_id, livePrice, quantity)
+                    self.showBuySellSuccesPopup("bought", currency_id, quantity)
+                    self.update()
+
+    def sell(self):
+        currencies_in_wallet = [curr["name"] for curr in self._account.getWallet()]
+        currency_id, done1 = QtWidgets.QInputDialog.getItem(
+            self.centralwidget, 'Sell currency', 'Currency you want to sell', currencies_in_wallet)
+        quantity, done2 = QtWidgets.QInputDialog.getInt(
+            self.centralwidget, 'Sell currency', 'Enter the quantity you want to sell')
+        if done1 and done2:
+            if currency_id not in currencies_in_wallet:
+                self.showBuySellIDPopup()
+            else:
+                for curr in self._account.getWallet():
+                    if curr["name"] == currency_id:
+                        currency = curr
+                if quantity < 1 or quantity > currency["quantity"]:
+                    self.showBuySellQuantityPopup()
+                else:
+                    self._account.sellCurrency(currency_id, quantity)
+                    self.showBuySellSuccesPopup("sold", currency_id, quantity)
+                    self.update()
+
+    def showBuySellIDPopup(self):
+        msg = QMessageBox()
+        msg.setWindowTitle("Incorrect Currency ID")
+        msg.setText("Chose ID from the provided list!")
+        x = msg.exec_()
+
+    def showBuySellQuantityPopup(self):
+        msg = QMessageBox()
+        msg.setWindowTitle("Incorrect Quantity of currency")
+        msg.setText("Check the amount You want to purchase/sell!")
+        x = msg.exec_()
+
+    def showBuySellSuccesPopup(self, transaction_type, name, quantity):
+        msg = QMessageBox()
+        msg.setWindowTitle("Transaction completed")
+        msg.setText(f"You have {transaction_type} {quantity} of {name}")
+        x = msg.exec_()
