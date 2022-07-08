@@ -20,7 +20,7 @@ class Market:
         jsonData = json.loads(data)
         for curr in jsonData:
             tmpCurr = {"id": curr["id"],
-                "name:": curr["name"],
+                "name": curr["name"],
                 "price": curr["price"],
                 "volume": curr["1d"]["volume"],
                 "1d": round(float(curr["1d"]["price_change_pct"])*100, 2),

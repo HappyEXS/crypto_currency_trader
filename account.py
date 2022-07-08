@@ -3,6 +3,7 @@ class Account:
         self._username = username
         self._invested = 0  # Wplacone pieniadze na konto
         self._funds = 0     # Dostępne srodki na koncie
+        self._wallet_v = 0  # Wartoć portfela kryptowalut
         self._balance = 0   # Wartosc calego konta
         self._wallet = []
 
@@ -29,6 +30,9 @@ class Account:
 
     def getFunds(self):
         return self._funds
+
+    def getWalletValue(self):
+        return self._wallet_v
 
     def addBalance(self, amount):
         self._balance += round(amount, 2)
@@ -71,7 +75,8 @@ class Account:
         self.updateBallance()
 
     def updateBallance(self):
-        ballance = 0
+        wallet_value = 0
         for curr in self._wallet:
-            ballance += curr["value"]
-        self._balance = round(ballance + self.getFunds(), 2)
+            wallet_value += curr["value"]
+        self._wallet_v = round(wallet_value, 2)
+        self._balance = round(self._wallet_v + self.getFunds(), 2)
