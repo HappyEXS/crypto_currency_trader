@@ -6,6 +6,7 @@ class Market:
         self._key = "efa54c05253d0bf4edaeee0fc4d576dc84b34b8a"
         self._url = f"https://api.nomics.com/v1/currencies/ticker?key={self._key}&ids=%s"
         self._currencies = "BTC,ETH,USDT,BNB,XRP,ADA,SOL,DOGE,ETC"
+        self._currencies_list = ["BTC", "ETH", "USDT", "BNB", "XRP", "ADA", "SOL", "DOGE", "ETC"]
         self._market = []
 
     def __str__(self):
