@@ -9,7 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView
 
 class Ui_MainWindow(object):
     def __init__(self, account, market):
@@ -209,7 +209,7 @@ class Ui_MainWindow(object):
         self.table_wallet.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.table_wallet.setObjectName("table_wallet")
         self.table_wallet.setColumnCount(7)
-        self.table_wallet.setRowCount(0)
+        self.table_wallet.setRowCount(5)
         item = QtWidgets.QTableWidgetItem()
         self.table_wallet.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
@@ -224,11 +224,12 @@ class Ui_MainWindow(object):
         self.table_wallet.setHorizontalHeaderItem(5, item)
         item = QtWidgets.QTableWidgetItem()
         self.table_wallet.setHorizontalHeaderItem(6, item)
-        self.table_wallet.horizontalHeader().setDefaultSectionSize(100)
+        self.table_wallet.horizontalHeader().setDefaultSectionSize(95)
         self.table_wallet.horizontalHeader().setSortIndicatorShown(False)
         self.table_wallet.horizontalHeader().setStretchLastSection(True)
+        self.table_wallet.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table_wallet.verticalHeader().setVisible(False)
-        self.table_wallet.verticalHeader().setMinimumSectionSize(31)
+        self.table_wallet.verticalHeader().setMinimumSectionSize(23)
 
     def setupTableMarket(self):
         self.table_market = QtWidgets.QTableWidget(self.frame)
@@ -243,7 +244,7 @@ class Ui_MainWindow(object):
         self.table_market.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.table_market.setObjectName("table_market")
         self.table_market.setColumnCount(7)
-        self.table_market.setRowCount(0)
+        self.table_market.setRowCount(9)
         item = QtWidgets.QTableWidgetItem()
         self.table_market.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
@@ -258,10 +259,12 @@ class Ui_MainWindow(object):
         self.table_market.setHorizontalHeaderItem(5, item)
         item = QtWidgets.QTableWidgetItem()
         self.table_market.setHorizontalHeaderItem(6, item)
+        self.table_market.horizontalHeader().setDefaultSectionSize(95)
         self.table_market.horizontalHeader().setSortIndicatorShown(True)
         self.table_market.horizontalHeader().setStretchLastSection(True)
+        self.table_market.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table_market.verticalHeader().setVisible(False)
-        self.table_market.verticalHeader().setMinimumSectionSize(31)
+        self.table_market.verticalHeader().setMinimumSectionSize(23)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -310,3 +313,73 @@ class Ui_MainWindow(object):
         self.label_funds_value.setText(_translate("MainWindow", "$4843.23"))
         self.button_bot_options.setText(_translate("MainWindow", "Bot options"))
         self.button_bot_statistics.setText(_translate("MainWindow", "Bot statistics"))
+        self.updateLabels()
+        self.updateMarket()
+        self.updateWallet()
+
+    def updateLabels(self):
+        self.label_balance.setText(f"Account balance: ${self._account.getBalance()}")
+        self.label_invested.setText(f"Invested money: ${self._account.getInvested()}")
+        self.label_username.setText(f"Account username: \"{self._account.getUsername()}\"")
+        self.label_recources_value.setText(f"${self._account.getWalletValue()}")
+        self.label_funds_value.setText(f"${self._account.getFunds()}")
+
+
+    def fortmatToBillions(self, value):
+        return round(float(value) / 1000000000, 2)
+
+    def formatPrice(self, value):
+        value = float(value)
+        if value > 9999: return round(value, 2)
+        elif value > 999: return round(value, 3)
+        elif value > 99: return round(value, 4)
+        elif value > 9: return round(value, 5)
+        else: return round(value, 6)
+
+    def updateMarket(self):
+        i = 0
+        for currency in self._market.getMarket():
+            self.table_market.setItem(i, 0, QTableWidgetItem(currency["id"]))
+            self.table_market.setItem(i, 1, QTableWidgetItem(f'${self.formatPrice(currency["price"])}'))
+            if currency["1d"] > 0: color = QtGui.QColor('green')
+            else: color = QtGui.QColor('red')
+            item = QTableWidgetItem(f'{currency["1d"]}%')
+            item.setForeground(color)
+            self.table_market.setItem(i, 2, item)
+            self.table_market.setItem(i, 3, QTableWidgetItem(f'${self.fortmatToBillions(currency["volume"])}B'))
+            self.table_market.setItem(i, 4, QTableWidgetItem(f'{currency["7d"]}%'))
+            self.table_market.setItem(i, 5, QTableWidgetItem(f'{currency["30d"]}%'))
+            self.button_graph = QtWidgets.QPushButton(self.centralwidget)
+            self.button_graph.setText("Graph")
+            self.table_market.setCellWidget(i, 6, self.button_graph)
+            i += 1
+
+    def updateWallet(self):
+        i = 0
+        for currency in self._account.getWallet():
+            self.table_wallet.setItem(i, 0, QTableWidgetItem(currency["name"]))
+            self.table_wallet.setItem(i, 1, QTableWidgetItem(f'${self.formatPrice(currency["price"])}'))
+            increse = (currency["currentPrice"] - currency["price"])* 100 / currency["price"]
+            if increse > 0: color = QtGui.QColor('green')
+            else: color = QtGui.QColor('red')
+            item = QTableWidgetItem(f'{round(increse, 2)}%')
+            item.setForeground(color)
+            self.table_wallet.setItem(i, 2, item)
+            self.table_wallet.setItem(i, 3, QTableWidgetItem(f'{currency["quantity"]}'))
+            self.table_wallet.setItem(i, 4, QTableWidgetItem(f'${self.formatPrice(currency["currentPrice"])}'))
+            self.table_wallet.setItem(i, 5, QTableWidgetItem(f'${self.formatPrice(currency["value"])}'))
+            profit = currency["value"] - (currency["price"]*currency["quantity"])
+            item = QTableWidgetItem(f'${self.formatPrice(profit)}')
+            item.setForeground(color)
+            self.table_wallet.setItem(i, 6, item)
+            i += 1
+
+    def update(self):
+        self._market.update()
+        self._account.updatePrices(self._market.getLivePrices())
+        self._account.updateWalletValue()
+        self._account.updateBallance()
+        self.updateWallet()
+        self.updateMarket()
+        self.updateLabels()
+
