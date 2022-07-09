@@ -155,6 +155,14 @@ class Ui_MainWindow(object):
         self.button_sell.setStyleSheet("background-color: rgb(102, 209, 255);")
         self.button_sell.setObjectName("button_sell")
         self.button_sell.clicked.connect(self.sell)
+        self.button_refresh = QtWidgets.QPushButton(self.frame)
+        self.button_refresh.setGeometry(QtCore.QRect(820, 10, 61, 31))
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.button_refresh.setFont(font)
+        self.button_refresh.setStyleSheet("background-color: rgb(205, 209, 255);")
+        self.button_refresh.setObjectName("button_refresh")
+        self.button_refresh.clicked.connect(self.update)
 
     def setupBotButtons(self):
         self.button_bot = QtWidgets.QPushButton(self.frame)
@@ -279,6 +287,7 @@ class Ui_MainWindow(object):
         self.button_deposit.setText(_translate("MainWindow", "Deposit"))
         self.button_buy.setText(_translate("MainWindow", "Buy Currency"))
         self.button_sell.setText(_translate("MainWindow", "Sell Currency"))
+        self.button_refresh.setText(_translate("MainWindow", "Refresh"))
         item = self.table_wallet.horizontalHeaderItem(0)
         item.setText(_translate("MainWindow", "Name"))
         item = self.table_wallet.horizontalHeaderItem(1)
@@ -316,9 +325,6 @@ class Ui_MainWindow(object):
         self.label_funds_value.setText(_translate("MainWindow", "$4843.23"))
         self.button_bot_options.setText(_translate("MainWindow", "Bot options"))
         self.button_bot_statistics.setText(_translate("MainWindow", "Bot statistics"))
-        self.updateLabels()
-        self.updateMarket()
-        self.updateWallet()
 
     def updateLabels(self):
         self.label_balance.setText(f"Account balance: ${self._account.getBalance()}")
