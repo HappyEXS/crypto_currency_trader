@@ -385,8 +385,7 @@ class Ui_MainWindow(object):
     def update(self):
         self._market.update()
         self._account.updatePrices(self._market.getLivePrices())
-        self._account.updateWalletValue()
-        self._account.updateBallance()
+        self._account.update()
         self.updateWallet()
         self.updateMarket()
         self.updateLabels()

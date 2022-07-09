@@ -1,3 +1,5 @@
+import json
+
 class Account:
     def __init__(self, username):
         self._username = username
@@ -74,8 +76,6 @@ class Account:
         for curr in self._wallet:
             curr["currentPrice"] = float(livePrices[curr["name"]])
             curr["value"] = curr["quantity"] * curr["currentPrice"]
-        self.updateWalletValue()
-        self.updateBallance()
 
     def updateWalletValue(self):
         wallet_value = 0
@@ -85,3 +85,29 @@ class Account:
 
     def updateBallance(self):
         self._balance = self.getWalletValue() + self.getFunds()
+
+    def saveToJson(self):
+        data = {
+            "username": self.getUsername(),
+            "invested": self.getInvested(),
+            "funds": self.getFunds(),
+            "wallet_value": self.getWalletValue(),
+            "balance": self.getBalance(),
+            "wallet": self.getWallet()
+        }
+        with open(f"acc_data/data_{self.getUsername()}.json", 'w') as f:
+            json.dump(data, f)
+
+    def readFromJson(self):
+        with open(f"acc_data/data_{self.getUsername()}.json") as f:
+            data = json.load(f)
+        self._invested = data["invested"]
+        self._funds = data["funds"]
+        self._wallet_v = data["wallet_value"]
+        self._balance = data["balance"]
+        self._wallet = data["wallet"]
+
+    def update(self):
+        self.updateWalletValue()
+        self.updateBallance()
+        self.saveToJson()

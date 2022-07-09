@@ -6,6 +6,7 @@ import sys
 
 def main():
     acc = Account("janek")
+    acc.readFromJson()
     market = Market()
     market.update()
 
@@ -14,8 +15,6 @@ def main():
     gui = Ui_MainWindow(acc, market)
     gui.setupUi(MainWindow)
     MainWindow.show()
-    gui._account.addInvested(70000)
-    gui._account.buyCurrency("BTC", 20139.54, 3)
     gui.update()
     sys.exit(app.exec_())
 
