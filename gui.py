@@ -381,6 +381,9 @@ class Ui_MainWindow(object):
             item.setForeground(color)
             self.table_wallet.setItem(i, 6, item)
             i += 1
+        for i in range(i, 5):
+            for j in range(7):
+                self.table_wallet.setItem(i, j, None)
 
     def update(self):
         self._market.update()
